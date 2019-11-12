@@ -24,11 +24,13 @@ gulp.task("sass", function() {
 
 gulp.task("server", function(done) {
   browserSync.init({
-    server: {
-      // サーバの立ち上がる位置
-      baseDir: "../",
-      index: "/html/index.php"
-    }
+    // server: {
+    //   // サーバの立ち上がる位置
+    //   baseDir: "../",
+    //   index: "/html/index.php"
+    // }
+    proxy: "http://nude.com",
+    reloadOnRestart: true,
   });
   done();
   console.log("+------------------+ server was launched +------------------+");
