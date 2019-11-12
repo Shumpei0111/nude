@@ -1,0 +1,15 @@
+@import "./module/variable";
+
+body {
+  font-size: 14px;
+  font-family: 'Times New Roman', Arial, Helvetica, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+
+  #signup {
+
+    .form {
+      padding-top: $pt;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+body {
+  font-size: 14px;
+  font-family: 'Times New Roman', Arial, Helvetica, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+body #signup .form {
+  padding-top: 16px;
+}
+
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYnVuZGxlLmNzcyIsInNvdXJjZXMiOlsiYnVuZGxlLnNjc3MiLCJtb2R1bGUvdmFyaWFibGUuc2NzcyJdLCJzb3VyY2VzQ29udGVudCI6WyJAaW1wb3J0IFwiLi9tb2R1bGUvdmFyaWFibGVcIjtcblxuYm9keSB7XG4gIGZvbnQtc2l6ZTogMTRweDtcbiAgZm9udC1mYW1pbHk6ICdUaW1lcyBOZXcgUm9tYW4nLCBBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmO1xuICBtYXgtd2lkdGg6IDkwMHB4O1xuICBtYXJnaW46IDAgYXV0bztcblxuICAjc2lnbnVwIHtcblxuICAgIC5mb3JtIHtcbiAgICAgIHBhZGRpbmctdG9wOiAkcHQ7XG4gICAgfVxuICB9XG59IiwiJHB0OiAxNnB4OyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFFQSxBQUFBLElBQUksQ0FBQztFQUNILFNBQVMsRUFBRSxJQUFJO0VBQ2YsV0FBVyxFQUFFLCtDQUErQztFQUM1RCxTQUFTLEVBQUUsS0FBSztFQUNoQixNQUFNLEVBQUUsTUFBTTtDQVFmOztBQVpELEFBUUksSUFSQSxDQU1GLE9BQU8sQ0FFTCxLQUFLLENBQUM7RUFDSixXQUFXLEVDWFosSUFBSTtDRFlKIn0= */
