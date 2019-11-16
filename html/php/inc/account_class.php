@@ -70,9 +70,7 @@ class Account
     }
     catch (PDOException $e)
     {
-      echo "name is :" . $name . " / mail is :" . $mail . " / pass is :" . $hash . "________";
-      echo "query is : '" . $query ."' ____" ;
-      echo "error message is : '" . $e->getMessage() . "' ____";
+      echo $e->getMessage().' in '.$e->getFile().' on line '.$e->getLine();
       throw new Exception("---74---, Database query error");
     }
 
