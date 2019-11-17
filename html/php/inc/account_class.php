@@ -62,7 +62,7 @@ class Account
 
     $hash = password_hash($passwd, PASSWORD_DEFAULT);
 
-    $values = array(":name" => $name, ":mail" => $mail, ":pass" => $hash);
+    $values = array(":name" => $name, ":mail" => $mail, ":passwd" => $hash);
 
     try {
       $res = $pdo->prepare($query);
@@ -76,6 +76,19 @@ class Account
 
     return $pdo->lastInsertId();
   }
+
+  public function isIdValid(int $id): bool
+  {
+    $valid = TRUE;
+
+    if(($id < 1) || ($id > 10000))
+    {
+      $valid = FALSE;
+    }
+
+    return $valid;
+  }
+
 
   public function isNameValid(string $name): bool
   {
@@ -91,6 +104,7 @@ class Account
     return $valid;
   }
 
+
   public function isMailValid(string $mail): bool
   {
     $valid = TRUE;
@@ -105,6 +119,7 @@ class Account
     return $valid;
   }
 
+
   public function isPasswdValid(string $passwd): bool
   {
     $valid = TRUE;
@@ -118,6 +133,7 @@ class Account
 
     return $valid;
   }
+
 
   public function getIdFromName(string $name): ?int
   {
@@ -150,6 +166,107 @@ class Account
     }
 
     return $id;
+  }
+
+
+  public function editAccount(int $id, string $name, string $mail, string $passwd, bool $enabled )
+  {
+
+    global $pdo;
+
+    $name = trim($name);
+    $mail = trim($mail);
+    $passwd = trim($passwd);
+
+    if(!$this->isIdValid($id))
+    {
+      echo $id;
+      throw new Exception("無効なIDです");
+    }
+
+    if(!$this->isNameValid($name))
+    {
+      echo $name;
+      throw new Exception("無効なユーザー名です");
+    }
+
+    if(!$this->isMailValid($mail))
+    {
+      echo $mail;
+      throw new Exception("無効なメールアドレスです");
+    }
+
+    if(!$this->isPasswdValid($passwd))
+    {
+      throw new Exception("無効なパスワードです");
+    }
+
+    $idFromName = $this->getIdFromName($name);
+
+    // 同一のユーザー名は弾く
+    if(!is_null($idFromName) && ($idFromName != $id))
+    {
+      throw new Exception("ユーザー名が重複しているため登録できません");
+    }
+
+    $query = "UPDATE nude.mst_member SET member_name = :name, mail = :mail, pass = :passwd, enabled = :enabled WHERE member_id = :id";
+
+    $hash - password_hash($pass, PASSWORD_DEFAULT);
+
+    $intEnabled = $enabled ? 1 : 0;
+
+    $values = array(":name" => $name, ":mail" => $mail, ":passwd" => $hash, ":enabled" => $intEnabled, ":id" => $id);
+
+    try {
+      $res = $pdo->prepare($query);
+      $res->execute($values);
+    }
+    catch (PDOException $e)
+    {
+      echo $e->getMessage().' in '. $e->getFile().' on line '. $e->getLine();
+      throw new Exception("Database query error");
+    }
+
+    // Delete an account (selected by its ID)
+    public function deleteAccount(int $id)
+    {
+      global $pdo;
+
+      if(!$this->isIdValid($id))
+      {
+        throw new Exception("無効なIDです");
+      }
+
+      $query = "UPDATE nude.mst_member SET deleted_at = CURRENT_TIMESTAMP WHERE member_id = :id";
+
+      $values = array(":id" => $id);
+
+      try {
+        $res = $pdo->prepare($query);
+        $res->execute($values);
+      }
+      catch (PDOException $e)
+      {
+        echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
+        throw new Exception("Database querry error");
+      }
+
+      $query = "DELETE FROM nude.member_sessions WHERE (member_id = :id)";
+
+      $values = array(":id" => $id);
+
+      try {
+        $res = pdo->prepare($query);
+        $res->execute($values);
+      }
+      catch (PDOException $e)
+      {
+        echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
+        throw new Exception("Database query error");
+      }
+    
+    }
+
   }
 
 } // ----- class
