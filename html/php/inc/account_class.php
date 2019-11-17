@@ -26,6 +26,8 @@ class Account
 
   }
 
+  // ------------------------------------------------------------------------ Add Account ------------------------------------------------------------------------ 
+
   // Add a new account to the system and return its ID (the member_id column if the accounts table)
   public function addAccount(string $name, string $mail, string $passwd): ?int
   {
@@ -268,5 +270,55 @@ class Account
     }
 
   }
+
+  // ------------------------------------------------------------------------ Login and Logout ------------------------------------------------------------------------
+  public function login(string $name, string $passwd): bool
+  {
+    global $pdo;
+
+    $name = trim($name);
+    $passwd = trim($passwd);
+
+    if(!$this->isNameValid($name))
+    {
+      return FALSE;
+    }
+
+    if(!$this->isPassValid($passwd))
+    {
+      return FALSE;
+    }
+    $query = "SELECT * FROM nude.mst_member WHERE (member_name = :name) AND (enabled = 1)";
+
+    $values = array(":name" => $name);
+
+    try {
+      $res = pdo->prepare($query);
+      $res->execute($values);
+    }
+    catch (PDOException $e)
+    {
+      echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
+      throw new Exception("Database query error");
+    }
+
+    $row = $res->fetch(PDO::FETCH_ASSOC);
+
+    if(is_array($row))
+    {
+      if(password_verify($passwd, $row["pass"]))
+      {
+        $this->id = intval($row["member_id"], 10);
+        $this->name = $name;
+        $this->auth = TRUE;
+
+        $this->registerLoginSessions();
+
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  } 
 
 } // ----- class
