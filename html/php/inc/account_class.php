@@ -321,4 +321,111 @@ class Account
     return FALSE;
   } 
 
+
+  // --------------------- Login time --------------------- 
+  public function registerLoginSession()
+  {
+    global $pdo;
+
+    // Check that a Session has been started
+    if(session_status() == PHP_SESSION_ACTIVE)
+    {
+      // Use a REPLACE statement to:
+      //   - insert s new row with the session id, if it doesn't exist or... 
+      //   - update the row having the session id, if it dosen't exist.
+      $query = "REPLACE INTO nude.member_sessions (session_id, member_id, login_time) VALUE (:sid, :memberId, NOW())";
+      $values = array(":sid" => session_id(), ":memberId" => $this->id);
+
+      try {
+        $res = pdo->prepare($query);
+        $res->execute($values);
+      }
+      catch (PDOException $e)
+      {
+        echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
+        throw new Exception("Database query error");
+      }
+    }
+  }
+
+  
+  // --------------------- session --------------------- 
+  public function sessionLogin()
+  {
+    global $pdo;
+
+    if(session_status() == PHP_SESSION_ACTIVE)
+    {
+      // Query template to look for the current session ID on the member_sessions table.
+      // The query also make sure the Session is not older than 7days
+      $query = 
+
+      "SELECT * FROM nude.member_sessions, nude.mst_member WHERE (member_sessions.session_id = :sid)" .
+      "AND (member_sessions.login_time >= (NOW() - INTERVAL 7 DAY)) AND (member_sessions.member_id = mst_member.member_id)" .
+      "AND (mst_member.enabled = 1)";
+
+      $values = array(":sid" => session_id());
+
+      try {
+        $res = pdo->prepare($query);
+        $res->execute($values);
+      }
+      catch (PDOException $e)
+      {
+        echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
+        throw new Exception("Database query error");
+      }
+
+      $row = $res->fetch(PDO::FETCH_ASSOC);
+
+      if(is_array($row))
+      {
+        // Authentication successed. Set the class properties (id and name) and return TRUE
+        $this->id = intval($row["member_id"], 10);
+        $this->name = $row["member_name"];
+        $this->auth = TRUE;
+
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+
+  // --------------------- Logout --------------------- 
+  public function logout()
+  {
+    global $pdo;
+
+    if(is_null($this->id))
+    {
+      return;
+    }
+
+    $this->id = NULL;
+    $this->name = NULL;
+    $this->mail = NULL;
+    $this->auth = FALSE;
+
+    if(session_status() == PHP_SESSION_ACTIVE)
+    {
+      $query = "DELETE FROM nude.member_sessions WHERE (session_id = :sid)";
+      $values = array(":sid" => sessin_id());
+    }
+
+    try {
+      $res = pdo->prepare($query);
+      $res->execute($values);
+    }
+    catch (PDOException $e)
+    {
+      echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
+      throw new Exception("Database query error");
+    }
+  }
+
+
+
+
 } // ----- class
