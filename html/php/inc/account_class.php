@@ -98,7 +98,7 @@ class Account
 
     $len = mb_strlen($name);
 
-    if (($len < 8) || ($len > 16))
+    if (($len < 4) || ($len > 16))
     {
       $valid = FALSE;
     }
@@ -213,7 +213,7 @@ class Account
 
     $query = "UPDATE nude.mst_member SET member_name = :name, mail = :mail, pass = :passwd, enabled = :enabled WHERE member_id = :id";
 
-    $hash - password_hash($pass, PASSWORD_DEFAULT);
+    $hash = password_hash($passwd, PASSWORD_DEFAULT);
 
     $intEnabled = $enabled ? 1 : 0;
 
@@ -229,46 +229,46 @@ class Account
       throw new Exception("Database query error");
     }
 
-    // Delete an account (selected by its ID)
-    public function deleteAccount(int $id)
+  }
+
+  // Delete an account (selected by its ID)
+  public function deleteAccount(int $id)
+  {
+    global $pdo;
+
+    if(!$this->isIdValid($id))
     {
-      global $pdo;
-
-      if(!$this->isIdValid($id))
-      {
-        throw new Exception("無効なIDです");
-      }
-
-      $query = "UPDATE nude.mst_member SET deleted_at = CURRENT_TIMESTAMP WHERE member_id = :id";
-
-      $values = array(":id" => $id);
-
-      try {
-        $res = $pdo->prepare($query);
-        $res->execute($values);
-      }
-      catch (PDOException $e)
-      {
-        echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
-        throw new Exception("Database querry error");
-      }
-
-      $query = "DELETE FROM nude.member_sessions WHERE (member_id = :id)";
-
-      $values = array(":id" => $id);
-
-      try {
-        $res = pdo->prepare($query);
-        $res->execute($values);
-      }
-      catch (PDOException $e)
-      {
-        echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
-        throw new Exception("Database query error");
-      }
-    
+      throw new Exception("無効なIDです");
     }
 
+    $query = "UPDATE nude.mst_member SET deleted_at = CURRENT_TIMESTAMP WHERE member_id = :id";
+
+    $values = array(":id" => $id);
+
+    try {
+      $res = $pdo->prepare($query);
+      $res->execute($values);
+    }
+    catch (PDOException $e)
+    {
+      echo $e->getMessage().' in ' .$e->getFile().' on line ' .$e->getLine();
+      throw new Exception("Database querry error");
+    }
+
+    $query = "DELETE FROM nude.member_sessions WHERE (member_id = :id)";
+
+    $values = array(":id" => $id);
+
+    try {
+      $res = $pdo->prepare($query);
+      $res->execute($values);
+    }
+    catch (PDOException $e)
+    {
+      echo $e->getMessage().' in ' .$e->getFile().' on line ' .$e->getLine();
+      throw new Exception("Database query error");
+    }
+  
   }
 
   // ------------------------------------------------------------------------ Login and Logout ------------------------------------------------------------------------
@@ -284,7 +284,7 @@ class Account
       return FALSE;
     }
 
-    if(!$this->isPassValid($passwd))
+    if(!$this->isPasswdValid($passwd))
     {
       return FALSE;
     }
@@ -293,12 +293,12 @@ class Account
     $values = array(":name" => $name);
 
     try {
-      $res = pdo->prepare($query);
+      $res = $pdo->prepare($query);
       $res->execute($values);
     }
     catch (PDOException $e)
     {
-      echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
+      echo $e->getMessage().' in ' .$e->getFile().' on line ' .$e->getLine();
       throw new Exception("Database query error");
     }
 
@@ -319,11 +319,36 @@ class Account
     }
 
     return FALSE;
-  } 
+  }
 
+  public function getId()
+  {
+    return  $this->id;
+  }
+
+  public function setId(string $id)
+  {
+    if($this->isIdValid($id))
+    {
+      $this->id = $id;
+    }
+  }
+
+  public function getName()
+  {
+    return  $this->name;
+  }
+
+  public function setName(string $name)
+  {
+    if($this->isNameValid($name))
+    {
+      $this->name = $name;
+    }
+  }
 
   // --------------------- Login time --------------------- 
-  public function registerLoginSession()
+  public function registerLoginSessions()
   {
     global $pdo;
 
@@ -337,12 +362,12 @@ class Account
       $values = array(":sid" => session_id(), ":memberId" => $this->id);
 
       try {
-        $res = pdo->prepare($query);
+        $res = $pdo->prepare($query);
         $res->execute($values);
       }
       catch (PDOException $e)
       {
-        echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
+        echo $e->getMessage().' in ' .$e->getFile().' on line ' .$e->getLine();
         throw new Exception("Database query error");
       }
     }
@@ -367,12 +392,12 @@ class Account
       $values = array(":sid" => session_id());
 
       try {
-        $res = pdo->prepare($query);
+        $res = $pdo->prepare($query);
         $res->execute($values);
       }
       catch (PDOException $e)
       {
-        echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
+        echo $e->getMessage().' in ' .$e->getFile().' on line ' .$e->getLine();
         throw new Exception("Database query error");
       }
 
@@ -411,20 +436,56 @@ class Account
     if(session_status() == PHP_SESSION_ACTIVE)
     {
       $query = "DELETE FROM nude.member_sessions WHERE (session_id = :sid)";
-      $values = array(":sid" => sessin_id());
+      $values = array(":sid" => session_id());
     }
 
     try {
-      $res = pdo->prepare($query);
+      $res = $pdo->prepare($query);
       $res->execute($values);
     }
     catch (PDOException $e)
     {
-      echo $e->getMessage().' in ' $e->getFile().' on line ' $e->getLine();
+      echo $e->getMessage().' in ' .$e->getFile().' on line ' .$e->getLine();
       throw new Exception("Database query error");
     }
   }
 
+
+  // Getter function for the $auth variable
+  // Returns TRUE if the user is authentivated
+  public function isAuth()
+  {
+    return $this->auth;
+  }
+
+
+  // Close all account Sessions except for the current one (aka: "logout form other deveices")
+  public function closeOtherSessions()
+  {
+    global $pdo;
+
+    if(is_null($this->id))
+    {
+      return;
+    }
+
+    if(session_status() == PHP_SESSION_ACTIVE)
+    {
+      $query = "DELETE FROM nude.member_sessions WHERE (session_id != :sid) AND (member_id = :member_id)";
+
+      $values = array(":sid" => session_id(), "member_id" => $this->id);
+
+      try {
+        $res = $pdo->prepare($query);
+        $res->execute($values);
+      }
+      catch (PDOException $e)
+      {
+        echo $e->getMessage().' in ' .$e->getFile().' on line ' .$e->getLine();
+        throw new Exception("Database query error");
+      }
+    }
+  } 
 
 
 
